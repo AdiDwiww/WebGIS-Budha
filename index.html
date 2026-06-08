@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="description" content="WebGIS interaktif peta sebaran tempat ibadah Buddha (Vihara, Kelenteng, Cetiya) di Kota Pekanbaru, Riau.">
+  <title>Peta Sebaran Tempat Ibadah Umat Buddha dan Tridharma di Pekanbaru</title>
+  <link rel="stylesheet" href="css/leaflet.css">
+  <link rel="stylesheet" href="css/modern.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Inline SVG icon helpers (no emoji, no external icon lib needed) -->
+  <style>
+    .ic { display:inline-flex; align-items:center; justify-content:center; }
+  </style>
+</head>
+<body>
+
+<!-- ════ SIDEBAR ════ -->
+<div id="sidebar">
+
+  <!-- Header -->
+  <div class="sidebar-header">
+    <div class="sidebar-logo">
+      <div class="logo-icon ic">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/><line x1="2" y1="12" x2="22" y2="12"/></svg>
+      </div>
+      <h1>Peta Sebaran Tempat Ibadah<br>Umat Buddha & Tridharma</h1>
+    </div>
+    <p class="sidebar-subtitle">Kota Pekanbaru, Riau &nbsp;&middot;&nbsp; WebGIS Interaktif</p>
+  </div>
+
+  <!-- Search -->
+  <div id="search-box">
+    <div class="search-wrap">
+      <span class="search-icon ic">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </span>
+      <input type="text" id="search-input" placeholder="Cari nama, jenis, atau alamat..." autocomplete="off">
+      <button class="search-clear" id="search-clear" title="Hapus">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div id="search-results"></div>
+  </div>
+
+  <!-- Body -->
+  <div class="sidebar-body">
+
+    <!-- Statistik -->
+    <p class="section-label">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/></svg>
+      Statistik
+    </p>
+    <div class="stats-grid">
+      <div class="stat-card total">
+        <div class="stat-number" id="stat-total">-</div>
+        <div class="stat-label">Total Tempat Ibadah</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="stat-vihara" style="color:#1a6b45">-</div>
+        <div class="stat-label"><span class="stat-dot" style="background:#1a6b45"></span>Vihara</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="stat-kelenteng" style="color:#c0392b">-</div>
+        <div class="stat-label"><span class="stat-dot" style="background:#c0392b"></span>Kelenteng</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="stat-cetiya" style="color:#b8930a">-</div>
+        <div class="stat-label"><span class="stat-dot" style="background:#d4ac0d"></span>Citaya / Cetiya</div>
+      </div>
+    </div>
+
+    <!-- Layer Control -->
+    <p class="section-label">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="12 2 2 7 12 12 22 7"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+      Tampilkan Layer
+    </p>
+    <div class="layer-list">
+
+      <div class="layer-item">
+        <div class="layer-icon ic" style="background:#dcfce7">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1a6b45" stroke-width="2.2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        </div>
+        <span class="layer-name">Vihara</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="toggle-vihara" checked>
+          <div class="toggle-track"></div>
+        </label>
+      </div>
+
+      <div class="layer-item">
+        <div class="layer-icon ic" style="background:#fee2e2">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c0392b" stroke-width="2.2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        </div>
+        <span class="layer-name">Kelenteng</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="toggle-kelenteng" checked>
+          <div class="toggle-track"></div>
+        </label>
+      </div>
+
+      <div class="layer-item">
+        <div class="layer-icon ic" style="background:#fef9c3">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#b8930a" stroke-width="2.2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        </div>
+        <span class="layer-name">Citaya / Cetiya</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="toggle-cetiya" checked>
+          <div class="toggle-track"></div>
+        </label>
+      </div>
+
+      <div class="layer-item">
+        <div class="layer-icon ic" style="background:#dbeafe">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.2"><rect x="2" y="3" width="20" height="18" rx="2"/><path d="M2 9h20"/><path d="M2 15h20"/><path d="M9 3v18"/></svg>
+        </div>
+        <span class="layer-name">Batas Kecamatan</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="toggle-admin-ar" checked>
+          <div class="toggle-track"></div>
+        </label>
+      </div>
+
+      <div class="layer-item">
+        <div class="layer-icon ic" style="background:#ffedd5">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ea580c" stroke-width="2.2"><path d="M3 12h18M12 3v18" stroke-dasharray="3 2"/></svg>
+        </div>
+        <span class="layer-name">Batas Administrasi</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="toggle-admin-ln" checked>
+          <div class="toggle-track"></div>
+        </label>
+      </div>
+
+    </div>
+
+    <!-- Basemap -->
+    <p class="section-label">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+      Basemap
+    </p>
+    <div class="basemap-grid">
+      <div class="basemap-item active" data-bm="carto_light">
+        <div class="basemap-preview" style="background:linear-gradient(135deg,#f5f5f0,#e4e8ed)"></div>
+        Carto Light
+      </div>
+      <div class="basemap-item" data-bm="osm">
+        <div class="basemap-preview" style="background:linear-gradient(135deg,#c8ddb4,#aacfe8)"></div>
+        OpenStreetMap
+      </div>
+    </div>
+
+    <!-- Aksi Peta -->
+    <p class="section-label">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      Aksi Peta
+    </p>
+    <div class="action-buttons">
+      <button class="action-btn primary" id="btn-fit">
+        <span class="btn-icon ic">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+        </span>
+        Zoom ke Semua Data
+      </button>
+      <button class="action-btn" id="btn-reset">
+        <span class="btn-icon ic">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.5"/></svg>
+        </span>
+        Reset Tampilan Peta
+      </button>
+    </div>
+
+  </div><!-- /sidebar-body -->
+
+  <!-- Footer -->
+  <div class="sidebar-footer">
+    <div class="footer-source">
+      <strong style="color:#475569">Sumber Data</strong><br>
+      &middot; <a href="https://openstreetmap.org" target="_blank">OpenStreetMap</a><br>
+      &middot; Data Tempat Ibadah Buddha Kota Pekanbaru<br>
+      &middot; Dibangun dengan <a href="https://leafletjs.com" target="_blank">Leaflet.js</a>
+    </div>
+  </div>
+
+</div><!-- /sidebar -->
+
+<!-- Sidebar toggle handle -->
+<button id="sidebar-toggle" title="Tutup / Buka Panel">
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8"><polyline points="15 18 9 12 15 6"/></svg>
+</button>
+
+<!-- MAP -->
+<div id="map"></div>
+
+<!-- Scripts -->
+<script src="js/qgis2web_expressions.js"></script>
+<script src="js/leaflet.js"></script>
+<script src="js/Autolinker.min.js"></script>
+<script src="data/ADMINISTRASIKECAMATAN_AR_50K_1.js"></script>
+<script src="data/ADMINISTRASI_LN_3.js"></script>
+<script src="data/Sebaran_Tridharma_4.js"></script>
+<script src="js/modern-webgis.js"></script>
+
+</body>
+</html>
